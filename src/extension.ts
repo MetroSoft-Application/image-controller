@@ -43,6 +43,8 @@ class ImageViewerProvider implements vscode.CustomReadonlyEditorProvider {
     private imageFiles: string[] = [];
     /** 現在表示中の画像のインデックス */
     private currentIndex: number = 0;
+    /** 画像読み込み中フラグ */
+    private isLoading: boolean = false;
 
     constructor(private readonly context: vscode.ExtensionContext) { }
 
@@ -72,7 +74,11 @@ class ImageViewerProvider implements vscode.CustomReadonlyEditorProvider {
 
         webviewPanel.webview.options = {
             enableScripts: true,
-            localResourceRoots: [vscode.Uri.file(path.dirname(document.uri.fsPath))]
+            localResourceRoots: [
+                vscode.Uri.file(path.dirname(document.uri.fsPath)),
+                // 親ディレクトリも追加してフォルダ移動に対応
+                vscode.Uri.file(path.dirname(path.dirname(document.uri.fsPath)))
+            ]
         };
 
         webviewPanel.webview.html = this.getHtmlContent(document.uri);
@@ -469,18 +475,12 @@ class ImageViewerProvider implements vscode.CustomReadonlyEditorProvider {
         });
         
         // キーボードショートカット
+        let keyProcessing = false;
         document.addEventListener('keydown', (e) => {
-            switch(e.key) {
-                case 'ArrowRight':
-                    sendMessage('nextImage');
-                    break;
-                case 'ArrowLeft':
-                    sendMessage('prevImage');
-                    break;
-                case 'Delete':
-                    sendMessage('deleteImage');
-                    break;
-            }
+            if (keyProcessing) return;
+            keyProcessing = true;
+            
+            setTimeout(() => { keyProcessing = false; }, 100);
             
             if (e.ctrlKey) {
                 switch(e.key) {
@@ -499,6 +499,23 @@ class ImageViewerProvider implements vscode.CustomReadonlyEditorProvider {
                     case 'ArrowDown':
                         e.preventDefault();
                         sendMessage('nextFolder');
+                        break;
+                }
+            } else {
+                switch(e.key) {
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        e.stopPropagation();
+                        sendMessage('nextImage');
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        e.stopPropagation();
+                        sendMessage('prevImage');
+                        break;
+                    case 'Delete':
+                        e.preventDefault();
+                        sendMessage('deleteImage');
                         break;
                 }
             }

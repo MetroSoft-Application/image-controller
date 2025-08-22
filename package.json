@@ -2,7 +2,7 @@
   "name": "image-controller",
   "displayName": "Image Controller",
   "description": "Rapid image browsing and cross-folder navigation. Zapping through large collections of images across multiple directories.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "MetroSoft-Application",
   "icon": "resources/icon.png",
   "engines": {
