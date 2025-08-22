@@ -1,0 +1,165 @@
+{
+  "name": "image-controller",
+  "displayName": "Image Controller",
+  "description": "Advanced image viewer with navigation, manipulation and control features",
+  "version": "1.0.0",
+  "publisher": "MetroSoft-Application",
+  "icon": "resources/icon.png",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "repository": {
+    "url": "https://github.com/MetroSoft-Application/image-controller"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "image",
+    "viewer",
+    "navigation",
+    "photo",
+    "picture",
+    "rotate",
+    "zoom",
+    "drag",
+    "delete",
+    "copy"
+  ],
+  "activationEvents": [
+    "onCustomEditor:imageController.imageViewer"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "imageController.imageViewer",
+        "displayName": "Image Controller",
+        "selector": [
+          {
+            "filenamePattern": "*.{png,jpg,jpeg,gif,bmp,webp,svg,ico}"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "commands": [
+      {
+        "command": "imageController.nextImage",
+        "title": "Next Image",
+        "icon": "$(chevron-right)"
+      },
+      {
+        "command": "imageController.prevImage",
+        "title": "Previous Image",
+        "icon": "$(chevron-left)"
+      },
+      {
+        "command": "imageController.nextFolder",
+        "title": "Next Folder",
+        "icon": "$(chevron-up)"
+      },
+      {
+        "command": "imageController.prevFolder",
+        "title": "Previous Folder",
+        "icon": "$(chevron-down)"
+      },
+      {
+        "command": "imageController.deleteImage",
+        "title": "Delete Image",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "imageController.copyImage",
+        "title": "Copy Image",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "imageController.rotateImage",
+        "title": "Rotate Image",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "imageController.resetZoom",
+        "title": "Reset Zoom",
+        "icon": "$(zoom-out)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "imageController.nextImage",
+        "key": "Right",
+        "when": "activeCustomEditorId == imageController.imageViewer"
+      },
+      {
+        "command": "imageController.prevImage",
+        "key": "Left",
+        "when": "activeCustomEditorId == imageController.imageViewer"
+      },
+      {
+        "command": "imageController.nextFolder",
+        "key": "ctrl+Up",
+        "when": "activeCustomEditorId == imageController.imageViewer"
+      },
+      {
+        "command": "imageController.prevFolder",
+        "key": "ctrl+Down",
+        "when": "activeCustomEditorId == imageController.imageViewer"
+      },
+      {
+        "command": "imageController.deleteImage",
+        "key": "Delete",
+        "when": "activeCustomEditorId == imageController.imageViewer"
+      },
+      {
+        "command": "imageController.copyImage",
+        "key": "ctrl+c",
+        "when": "activeCustomEditorId == imageController.imageViewer"
+      },
+      {
+        "command": "imageController.rotateImage",
+        "key": "ctrl+r",
+        "when": "activeCustomEditorId == imageController.imageViewer"
+      }
+    ],
+    "configuration": {
+      "title": "Image Controller",
+      "properties": {
+        "imageController.zoomStep": {
+          "type": "number",
+          "default": 0.1,
+          "description": "Zoom step when using mouse wheel"
+        },
+        "imageController.maxZoom": {
+          "type": "number",
+          "default": 10,
+          "description": "Maximum zoom level"
+        },
+        "imageController.minZoom": {
+          "type": "number",
+          "default": 0.1,
+          "description": "Minimum zoom level"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/mocha": "^10.0.3",
+    "@types/node": "18.x",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@typescript-eslint/parser": "^6.7.3",
+    "eslint": "^8.50.0",
+    "typescript": "^5.2.2",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.4"
+  }
+}
