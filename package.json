@@ -1,7 +1,7 @@
 {
   "name": "image-controller",
   "displayName": "Image Controller",
-  "description": "Advanced image viewer with navigation, manipulation and control features",
+  "description": "Rapid image browsing and cross-folder navigation. Zapping through large collections of images across multiple directories.",
   "version": "1.0.0",
   "publisher": "MetroSoft-Application",
   "icon": "resources/icon.png",
@@ -20,11 +20,16 @@
     "navigation",
     "photo",
     "picture",
+    "zapping",
+    "folder",
+    "browse",
+    "gallery",
+    "cross-folder",
+    "rapid",
+    "fast",
     "rotate",
     "zoom",
-    "drag",
-    "delete",
-    "copy"
+    "drag"
   ],
   "activationEvents": [
     "onCustomEditor:imageController.imageViewer"
