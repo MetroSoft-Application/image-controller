@@ -395,266 +395,32 @@ class ImageViewerProvider implements vscode.CustomReadonlyEditorProvider {
      * @returns HTMLコンテンツ
      */
     private getHtmlContent(uri: vscode.Uri): string {
-        const webviewUri = this.activeWebview?.webview.asWebviewUri(uri);
+        try {
+            const webviewUri = this.activeWebview?.webview.asWebviewUri(uri);
+            const templatePath = path.join(this.context.extensionPath, 'src', 'template.html');
+            let htmlContent = fs.readFileSync(templatePath, 'utf8');
 
-        return `<!DOCTYPE html>
-<html>
+            // テンプレートの置換
+            htmlContent = htmlContent.replace(/{{{IMAGE_URI}}}/g, webviewUri?.toString() || '');
+            htmlContent = htmlContent.replace(/{{{FILE_NAME}}}/g, path.basename(uri.fsPath));
+
+            return htmlContent;
+        } catch (error) {
+            console.error('Error loading HTML template:', error);
+            // フォールバック：シンプルなHTMLを返す
+            const webviewUri = this.activeWebview?.webview.asWebviewUri(uri);
+            return `<!DOCTYPE html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Controller</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #1e1e1e;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        #imageContainer {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: grab;
-        }
-        
-        #imageContainer.dragging {
-            cursor: grabbing;
-        }
-        
-        #image {
-            max-width: none;
-            max-height: none;
-            width: auto;
-            height: auto;
-            transform-origin: center;
-        }
-        
-        #toolbar {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 5px;
-            padding: 5px;
-            display: flex;
-            gap: 5px;
-        }
-        
-        .toolbar-button {
-            background: #007acc;
-            border: none;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        .toolbar-button:hover {
-            background: #005a9e;
-        }
-        
-        #info {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 3px;
-            font-size: 12px;
-        }
-    </style>
 </head>
 <body>
-    <div id="imageContainer">
-        <img id="image" src="${webviewUri}" alt="Image">
-    </div>
-    
-    <div id="toolbar">
-        <button class="toolbar-button" onclick="sendMessage('prevImage')" title="Previous Image (Left Arrow)">◀</button>
-        <button class="toolbar-button" onclick="sendMessage('nextImage')" title="Next Image (Right Arrow)">▶</button>
-        <button class="toolbar-button" onclick="sendMessage('nextFolder')" title="Previous Folder (Ctrl+Up)">🔽</button>
-        <button class="toolbar-button" onclick="sendMessage('prevFolder')" title="Next Folder (Ctrl+Down)">🔼</button>
-        <button class="toolbar-button" onclick="sendMessage('rotateImage')" title="Rotate Image (Ctrl+R)">↻</button>
-        <button class="toolbar-button" onclick="sendMessage('resetZoom')" title="Reset Zoom & Position">⌂</button>
-        <button class="toolbar-button" onclick="sendMessage('copyImage')" title="Copy Image Path (Ctrl+C)">📋</button>
-        <button class="toolbar-button" onclick="sendMessage('deleteImage')" title="Delete Image (Delete Key)">🗑</button>
-    </div>
-    
-    <div id="info">
-        <span id="filename">${path.basename(uri.fsPath)}</span>
-    </div>
-
-    <script>
-        const vscode = acquireVsCodeApi();
-        let scale = 1;
-        let rotation = 0;
-        let isDragging = false;
-        let dragStart = { x: 0, y: 0 };
-        let imagePosition = { x: 0, y: 0 };
-        let isProcessing = false;
-        
-        const image = document.getElementById('image');
-        const container = document.getElementById('imageContainer');
-        
-        function sendMessage(command) {
-            // 処理中の場合は新しいリクエストを無視
-            if (isProcessing) {
-                return;
-            }
-            
-            // 非同期処理の場合はフラグを設定
-            if (['nextImage', 'prevImage', 'nextFolder', 'prevFolder', 'deleteImage'].includes(command)) {
-                isProcessing = true;
-                // 安全装置として2秒後にフラグをリセット
-                setTimeout(() => {
-                    isProcessing = false;
-                }, 2000);
-            }
-            
-            vscode.postMessage({ command: command });
-        }
-        
-        // マウスホイールでズーム
-        container.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? -0.1 : 0.1;
-            scale = Math.max(0.1, Math.min(10, scale + delta));
-            updateTransform();
-        });
-        
-        // マウスドラッグで画像移動
-        container.addEventListener('mousedown', (e) => {
-            if (e.target === image) {
-                isDragging = true;
-                container.classList.add('dragging');
-                dragStart.x = e.clientX - imagePosition.x;
-                dragStart.y = e.clientY - imagePosition.y;
-            }
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                imagePosition.x = e.clientX - dragStart.x;
-                imagePosition.y = e.clientY - dragStart.y;
-                updateTransform();
-            }
-        });
-        
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            container.classList.remove('dragging');
-        });
-        
-        // キーボードショートカット
-        let keyProcessing = false;
-        document.addEventListener('keydown', (e) => {
-            if (keyProcessing || isProcessing) {
-                return;
-            }
-            keyProcessing = true;
-            
-            setTimeout(() => { keyProcessing = false; }, 100);
-            
-            if (e.ctrlKey) {
-                switch(e.key) {
-                    case 'c':
-                        e.preventDefault();
-                        sendMessage('copyImage');
-                        break;
-                    case 'r':
-                        e.preventDefault();
-                        sendMessage('rotateImage');
-                        break;
-                    case 'ArrowUp':
-                        e.preventDefault();
-                        sendMessage('prevFolder');
-                        break;
-                    case 'ArrowDown':
-                        e.preventDefault();
-                        sendMessage('nextFolder');
-                        break;
-                }
-            } else {
-                switch(e.key) {
-                    case 'ArrowRight':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        sendMessage('nextImage');
-                        break;
-                    case 'ArrowLeft':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        sendMessage('prevImage');
-                        break;
-                    case 'Delete':
-                        e.preventDefault();
-                        sendMessage('deleteImage');
-                        break;
-                }
-            }
-        });
-        
-        function updateTransform() {
-            image.style.transform = \`translate(\${imagePosition.x}px, \${imagePosition.y}px) scale(\${scale}) rotate(\${rotation}deg)\`;
-        }
-        
-        // VS Codeからのメッセージを処理
-        window.addEventListener('message', event => {
-            const message = event.data;
-            switch (message.command) {
-                case 'rotate':
-                    rotation = (rotation + 90) % 360;
-                    updateTransform();
-                    break;
-                case 'resetZoom':
-                    // 画像をフィットサイズに戻す
-                    const containerWidth = container.clientWidth;
-                    const containerHeight = container.clientHeight - 20;
-                    const imageWidth = image.naturalWidth;
-                    const imageHeight = image.naturalHeight;
-                    
-                    const scaleX = (containerWidth * 0.98) / imageWidth;
-                    const scaleY = (containerHeight * 0.98) / imageHeight;
-                    const fitScale = Math.min(scaleX, scaleY);
-                    
-                    scale = fitScale;
-                    rotation = 0;
-                    imagePosition = { x: 0, y: 0 };
-                    updateTransform();
-                    break;
-                case 'operationComplete':
-                    // 操作完了時にフラグをリセット
-                    isProcessing = false;
-                    break;
-            }
-        });
-        
-        // 画像読み込み完了時にフィットサイズを計算
-        image.addEventListener('load', () => {
-            const containerWidth = container.clientWidth;
-            const containerHeight = container.clientHeight - 20;
-            const imageWidth = image.naturalWidth;
-            const imageHeight = image.naturalHeight;
-            
-            // 画像をコンテナに収まるようにスケールを計算
-            const scaleX = (containerWidth * 0.98) / imageWidth;
-            const scaleY = (containerHeight * 0.98) / imageHeight;
-            const fitScale = Math.min(scaleX, scaleY);
-            
-            scale = fitScale;
-            rotation = 0;
-            imagePosition = { x: 0, y: 0 };
-            updateTransform();
-        });
-    </script>
+    <img src="${webviewUri}" alt="Image" style="max-width: 100%; max-height: 100%;">
+    <p>Error loading template: ${error}</p>
 </body>
 </html>`;
+        }
     }
 }
 
