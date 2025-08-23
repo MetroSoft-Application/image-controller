@@ -397,7 +397,26 @@ class ImageViewerProvider implements vscode.CustomReadonlyEditorProvider {
     private getHtmlContent(uri: vscode.Uri): string {
         try {
             const webviewUri = this.activeWebview?.webview.asWebviewUri(uri);
-            const templatePath = path.join(this.context.extensionPath, 'src', 'template.html');
+            
+            // テンプレートファイルの場所を複数試す
+            const possibleTemplatePaths = [
+                path.join(this.context.extensionPath, 'src', 'template.html'),
+                path.join(this.context.extensionPath, 'template.html'),
+                path.join(this.context.extensionPath, 'out', 'template.html')
+            ];
+            
+            let templatePath: string | undefined;
+            for (const possiblePath of possibleTemplatePaths) {
+                if (fs.existsSync(possiblePath)) {
+                    templatePath = possiblePath;
+                    break;
+                }
+            }
+            
+            if (!templatePath) {
+                throw new Error(`Template file not found in any of the expected locations: ${possibleTemplatePaths.join(', ')}`);
+            }
+            
             let htmlContent = fs.readFileSync(templatePath, 'utf8');
 
             // テンプレートの置換

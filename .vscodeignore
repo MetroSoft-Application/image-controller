@@ -2,7 +2,10 @@
 node_modules
 .vscode-test/
 .vscode-test/**
-src/**
+src/**/*.ts
+src/**/*.js
+src/**/*.map
+!src/template.html
 tsconfig.json
 .gitignore
 .editorconfig

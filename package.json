@@ -2,7 +2,7 @@
   "name": "image-controller",
   "displayName": "Image Controller",
   "description": "Rapid image browsing and cross-folder navigation. Zapping through large collections of images across multiple directories.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "MetroSoft-Application",
   "icon": "resources/icon.png",
   "engines": {
@@ -149,8 +149,9 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run copy-resources",
     "compile": "tsc -p ./",
+    "copy-resources": "node -e \"const fs = require('fs'); const path = require('path'); if (!fs.existsSync('out')) fs.mkdirSync('out'); fs.copyFileSync(path.join('src', 'template.html'), path.join('out', 'template.html'));\"",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
