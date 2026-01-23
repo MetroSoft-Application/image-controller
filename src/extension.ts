@@ -421,7 +421,7 @@ class ImageViewerProvider implements vscode.CustomReadonlyEditorProvider {
 
             // テンプレートの置換
             htmlContent = htmlContent.replace(/{{{IMAGE_URI}}}/g, webviewUri?.toString() || '');
-            htmlContent = htmlContent.replace(/{{{FILE_NAME}}}/g, path.basename(uri.fsPath));
+            htmlContent = htmlContent.replace(/{{{FILE_NAME}}}/g, uri.fsPath);
 
             return htmlContent;
         } catch (error) {

@@ -2,7 +2,7 @@
   "name": "image-controller",
   "displayName": "Image Controller",
   "description": "Rapid image browsing and cross-folder navigation. Zapping through large collections of images across multiple directories.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "MetroSoft-Application",
   "icon": "resources/icon.png",
   "engines": {
@@ -103,12 +103,12 @@
       },
       {
         "command": "imageController.nextFolder",
-        "key": "ctrl+Up",
+        "key": "ctrl+Down",
         "when": "activeCustomEditorId == imageController.imageViewer"
       },
       {
         "command": "imageController.prevFolder",
-        "key": "ctrl+Down",
+        "key": "ctrl+Up",
         "when": "activeCustomEditorId == imageController.imageViewer"
       },
       {
