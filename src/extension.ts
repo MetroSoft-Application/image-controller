@@ -152,7 +152,7 @@ class ImageViewerProvider implements vscode.CustomReadonlyEditorProvider {
      */
     private isImageFile(filename: string): boolean {
         const ext = path.extname(filename).toLowerCase();
-        return ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.svg', '.ico'].includes(ext);
+        return ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.svg', '.ico', '.avif', '.jfif', '.apng', '.pjp', '.pjpeg'].includes(ext);
     }
 
     /**
