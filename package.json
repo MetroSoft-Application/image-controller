@@ -42,7 +42,7 @@
         "displayName": "Image Controller",
         "selector": [
           {
-            "filenamePattern": "*.{png,jpg,jpeg,gif,bmp,webp,svg,ico}"
+            "filenamePattern": "*.{png,jpg,jpeg,gif,bmp,webp,svg,ico,avif,jfif,apng,pjp,pjpeg}"
           }
         ],
         "priority": "option"
